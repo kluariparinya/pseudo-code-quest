@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pseudo Code Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#e9ecef;font-family:'Kanit',sans-serif;color:#222;padding:16px}
+.wrap{max-width:860px;margin:0 auto;background:#eee;border:3px solid #7a0019;border-radius:18px;padding:18px}
+.hidden{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #7a0019;border-radius:12px;padding:10px 20px;margin-bottom:14px}
+.top small{display:block;color:#6c8a8a;font-size:12px}
+.top b{font-size:18px;color:#a1002a}
+.top .c{text-align:center}.top .c b{color:#3b0010;font-size:20px}.top .r{text-align:right}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.cols{grid-template-columns:1fr}}
+.panel{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px #0002}
+.panel h3{margin:0;padding:12px;text-align:center;color:#fff;background:#7a0019;font-size:16px;font-weight:500}
+.panel.code h3{background:#4a0010}
+.story{padding:16px;min-height:260px;line-height:1.8;font-size:15px}
+.story i{color:#a1002a;font-size:13px}
+.slots{padding:14px;background:#f5f6fa;display:flex;flex-direction:column;gap:8px}
+.fix{background:#2b2d42;color:#fff;text-align:center;padding:10px;border-radius:8px;font-weight:600;border-bottom:3px solid #14152a}
+.slot{min-height:42px;border:1.5px dashed #e98b96;background:#ffe9ec;border-radius:8px;color:#e07a88;font-size:13px;display:flex;align-items:center;justify-content:center;padding:4px}
+.slot.over{background:#ffd0d6}
+.slot.ok{border:2px solid #2e9e55;background:#e6f7ec}
+.slot.bad{border:2px solid #d62839;background:#ffe3e6}
+.bank{margin-top:14px;background:#fff;border:1px solid #7a0019;border-radius:12px;padding:14px}
+.bank h4{margin:0 0 10px;color:#4a0010;font-size:15px;font-weight:500}
+.blocks{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:48px}
+.blk{font-family:Consolas,monospace;font-size:14px;color:#fff;background:#7a0019;padding:11px 16px;border-radius:8px;border:1px solid #b0314d;border-bottom:4px solid #3b0010;cursor:grab;user-select:none}
+.blk.th{font-family:'Kanit',sans-serif;font-size:14px}
+.blk.inslot{width:100%;text-align:center;border-radius:6px}
+.runbox{text-align:center;margin-top:16px}
+button.run,button.big{font-family:inherit;font-weight:600;font-size:18px;color:#fff;background:#e63946;border:2px solid #111;border-bottom:5px solid #a4162a;border-radius:14px;padding:14px 40px;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.center{max-width:440px;margin:30px auto;text-align:center}
+.center h1{color:#7a0019;margin:0 0 6px}
+.center input{width:100%;padding:12px;margin:8px 0;font-family:inherit;font-size:16px;border:1.5px solid #7a0019;border-radius:10px}
+.note{font-size:13px;color:#666}
+.err{color:#d62839;min-height:22px;font-size:14px}
+#toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 22px;border-radius:30px;z-index:9;display:none;max-width:90%;text-align:center}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;z-index:10}
+.modal .box{background:#fff;border-radius:16px;padding:26px;max-width:380px;text-align:center;border:3px solid #7a0019}
+.modal .box h2{margin:0 0 8px;color:#7a0019}
+.score{font-size:56px;font-weight:600;color:#7a0019;line-height:1}
+.sub{display:flex;gap:10px;justify-content:center;margin:14px 0}
+.sub div{background:#fff;border:1px solid #7a0019;border-radius:10px;padding:8px 14px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- หน้าเริ่มเกม -->
+  <div id="login" class="center">
+    <h1>💻 Pseudo Code Quest</h1>
+    <p class="note">ด่าน 1: เรียงขั้นตอนภาษาไทย • ด่าน 2: แปลงเป็น Pseudo Code<br>ด่านละ 10 ภารกิจ • ชีวิต 3 ดวงต่อด่าน • คะแนนเต็ม 100<br><b>เล่นได้ครั้งเดียวเท่านั้น</b></p>
+    <input id="inName" placeholder="ชื่อ-นามสกุล" autocomplete="off">
+    <input id="inId" placeholder="รหัสนักศึกษา" inputmode="numeric" autocomplete="off">
+    <div class="err" id="loginErr"></div>
+    <button class="big" id="btnStart">เริ่มเล่น ▶️</button>
+  </div>
+
+  <!-- หน้าเกม -->
+  <div id="game" class="hidden">
+    <div class="top">
+      <div><small>ผู้เล่น</small><b id="hName"></b></div>
+      <div class="c"><small id="hStage"></small><b id="hMission"></b></div>
+      <div class="r"><small>พลังชีวิต</small><span id="hHearts" style="font-size:18px"></span></div>
+    </div>
+    <div class="cols">
+      <div class="panel"><h3 id="pL"></h3><div class="story" id="story"></div></div>
+      <div class="panel code"><h3 id="pR"></h3>
+        <div class="slots"><div class="fix">Start</div><div id="slots" style="display:contents"></div><div class="fix">End</div></div>
+      </div>
+    </div>
+    <div class="bank" id="bankBox">
+      <h4 id="bTitle"></h4>
+      <div class="blocks" id="bank"></div>
+    </div>
+    <div class="runbox"><button class="run" id="btnRun">ตรวจสอบ (Run) ▶️</button></div>
+  </div>
+
+  <!-- หน้าสรุป -->
+  <div id="result" class="center hidden">
+    <h1 id="rTitle"></h1>
+    <div class="score" id="rScore"></div>
+    <p>คะแนนเต็ม 100</p>
+    <div class="sub"><div id="rS1"></div><div id="rS2"></div></div>
+    <p id="rInfo"></p>
+    <p class="note">บันทึกคะแนนของ <b id="rWho"></b> แล้ว<br>รหัสนี้เล่นซ้ำไม่ได้ ปิดหน้านี้ได้เลย</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="modal" class="modal hidden"><div class="box">
+  <h2 id="mTitle"></h2><p id="mText"></p><button class="big" id="mBtn" style="font-size:16px;padding:10px 30px">ตกลง</button>
+</div></div>
+
+<script>
+/* ========= ตั้งค่า ========= */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGAGeygP4u3usN9Rq0_qdRDaMZynDxoLmfpW0TBBhTvFIckN8_nzWzSb46nDguBnl2bA/exec';
+const PTS_FIRST = 5;   // ตอบถูกครั้งแรก
+const PTS_RETRY = 3;   // ตอบถูกหลังจากเคยผิด
+
+/* ========= ภารกิจ (th กับ code ต้องมีจำนวนเท่ากัน จับคู่ทีละบรรทัด และห้ามซ้ำกันในภารกิจเดียว) ========= */
+const MISSIONS = [
+ {title:'ทักทายชื่อ', goal:'รับชื่อจากผู้ใช้ แล้วแสดงชื่อออกมา',
+  th:['ประกาศตัวแปรชื่อ name','รับค่า name จากผู้ใช้','แสดงค่า name'],
+  code:['declare name','read name','print name']},
+ {title:'หาพื้นที่สี่เหลี่ยมผืนผ้า', goal:'รับความกว้างและความยาว แล้วคำนวณพื้นที่',
+  th:['รับค่าความกว้าง (width)','รับค่าความยาว (length)','คำนวณ area = กว้าง × ยาว','แสดงค่า area'],
+  code:['read width','read length','area = width * length','print area']},
+ {title:'บวกเลขสองจำนวน', goal:'รับตัวเลขสองจำนวน แล้วแสดงผลบวก',
+  th:['รับตัวเลข a','รับตัวเลข b','หาผลบวก sum = a + b','แสดงค่า sum'],
+  code:['read a','read b','sum = a + b','print sum']},
+ {title:'เลขคู่ หรือ เลขคี่', goal:'รับตัวเลข แล้วบอกว่าเป็นเลขคู่หรือเลขคี่',
+  th:['รับตัวเลข n','ถ้า n หาร 2 เหลือเศษ 0 ให้','แสดงคำว่า Even','มิฉะนั้น','แสดงคำว่า Odd'],
+  code:['read n','if n % 2 == 0 then','print "Even"','else','print "Odd"']},
+ {title:'สอบผ่าน หรือ ตก', goal:'รับคะแนนสอบ แล้วบอกว่าผ่านหรือตก (เกณฑ์ผ่านคือ 50)',
+  th:['รับคะแนนสอบ (score)','ถ้าคะแนน >= 50 ให้','แสดงคำว่า Pass','มิฉะนั้น','แสดงคำว่า Fail'],
+  code:['read score','if score >= 50 then','print "Pass"','else','print "Fail"']},
+ {title:'แสดงเลข 1 ถึง 5', goal:'แสดงตัวเลข 1 ถึง 5 ทีละตัวโดยใช้การวนซ้ำ',
+  th:['กำหนด i เริ่มที่ 1','วนซ้ำขณะที่ i <= 5','แสดงค่า i','เพิ่มค่า i ทีละ 1','จบการวนซ้ำ'],
+  code:['set i = 1','while i <= 5','print i','i = i + 1','end while']},
+ {title:'หาผลรวม 1 ถึง 3', goal:'บวกเลข 1 ถึง 3 เข้าด้วยกัน แล้วแสดงผลรวม',
+  th:['กำหนด sum เริ่มที่ 0','วนซ้ำให้ i ตั้งแต่ 1 ถึง 3','เอา i บวกเข้า sum','จบการวนซ้ำ','แสดงค่า sum'],
+  code:['set sum = 0','for i = 1 to 3','sum = sum + i','end for','print sum']},
+ {title:'ตรวจรหัสผ่าน', goal:'รับรหัสผ่าน แล้วตรวจว่าตรงกับ "1234" หรือไม่',
+  th:['รับรหัสผ่าน (password)','ถ้า password เท่ากับ "1234" ให้','แสดงคำว่า Welcome','มิฉะนั้น','แสดงคำว่า Wrong'],
+  code:['read password','if password == "1234" then','print "Welcome"','else','print "Wrong"']},
+ {title:'ส่วนลดร้านค้า', goal:'ถ้าซื้อครบ 1,000 บาท ลดราคาให้ 100 บาท แล้วแสดงราคาสุดท้าย',
+  th:['รับราคาสินค้า (price)','ถ้า price >= 1000 ให้','ลดราคาลง 100','จบเงื่อนไข','แสดงราคาสุดท้าย'],
+  code:['read price','if price >= 1000 then','price = price - 100','end if','print price']},
+ {title:'เฉลี่ยคะแนน 3 คน', goal:'รับคะแนนนักเรียน 3 คน แล้วหาค่าเฉลี่ย',
+  th:['กำหนด total เริ่มที่ 0','วนซ้ำ 3 รอบ (i = 1 ถึง 3)','รับคะแนน score','เอา score บวกเข้า total','จบการวนซ้ำ','หาค่าเฉลี่ย avg = total / 3','แสดงค่า avg'],
+  code:['set total = 0','for i = 1 to 3','read score','total = total + score','end for','avg = total / 3','print avg']}
+];
+
+/* ========= ตัวแปรสถานะ ========= */
+const $ = id => document.getElementById(id);
+let player={}, stage=1, idx=0, lives=3, s1=0, s2=0, passed=0, tries=0, placed=[], order=[], startTime=0, busy=false, queue=Promise.resolve();
+
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2200)}
+function modal(title,text,cb){$('mTitle').textContent=title;$('mText').innerHTML=text;$('modal').classList.remove('hidden');$('mBtn').onclick=()=>{$('modal').classList.add('hidden');cb&&cb()}}
+function shuffle(a){let b=a.slice();do{for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}}while(b.join()===a.join());return b}
+function answer(){const m=MISSIONS[idx];return stage===1?m.th:m.code}
+
+/* ========= ส่งข้อมูลไป Google Sheet ========= */
+function api(params){
+  const q=Object.keys(params).map(k=>k+'='+encodeURIComponent(params[k])).join('&');
+  return fetch(SCRIPT_URL+'?'+q);
+}
+function sync(status){
+  if(!SCRIPT_URL) return;
+  const data={action:'update',id:player.id,total:s1+s2,s1:s1,s2:s2,passed:passed,stage:stage,status:status,
+              time:Math.round((Date.now()-startTime)/1000)};
+  queue=queue.then(()=>api(data)).catch(()=>{});   // ส่งทีละรายการตามลำดับ
+}
+
+/* ========= เริ่มเกม ========= */
+$('btnStart').onclick=async()=>{
+  const name=$('inName').value.trim(), id=$('inId').value.trim().replace(/\s+/g,'');
+  const err=$('loginErr'); err.textContent='';
+  if(!name){err.textContent='กรุณากรอกชื่อ-นามสกุล';return}
+  if(!/^[0-9A-Za-z-]{5,20}$/.test(id)){err.textContent='กรุณากรอกรหัสนักศึกษาให้ถูกต้อง';return}
+  if(localStorage.getItem('pcq_'+id)){err.textContent='รหัสนี้เล่นไปแล้ว เล่นได้ครั้งเดียวเท่านั้น';return}
+  $('btnStart').disabled=true; err.textContent='กำลังตรวจสอบ...';
+  if(SCRIPT_URL){
+    try{
+      const r=await api({action:'start',id:id,name:name}); const j=await r.json();
+      if(!j.ok){err.textContent='รหัสนี้เล่นไปแล้ว เล่นได้ครั้งเดียวเท่านั้น';try{localStorage.setItem('pcq_'+id,'1')}catch(e){}$('btnStart').disabled=false;return}
+    }catch(e){err.textContent='เชื่อมต่อระบบไม่ได้ ลองใหม่อีกครั้ง';$('btnStart').disabled=false;return}
+  }
+  try{localStorage.setItem('pcq_'+id,'1')}catch(e){}
+  player={id,name}; startTime=Date.now();
+  $('login').classList.add('hidden'); $('game').classList.remove('hidden');
+  $('hName').textContent=name; loadMission();
+};
+
+/* ========= โหลดภารกิจ ========= */
+function loadMission(){
+  const m=MISSIONS[idx]; tries=0;
+  const ans=answer();
+  placed=Array(ans.length).fill(null);
+  order=shuffle(ans);
+  if(stage===1){
+    $('pL').textContent='📝 โจทย์';
+    $('pR').textContent='🇹🇭 ลำดับขั้นตอน (ภาษาไทย)';
+    $('bTitle').textContent='📦 คลังขั้นตอน (ลากไปวางในช่องว่างด้านบน หรือแตะเพื่อวาง)';
+    $('story').innerHTML='<b>ภารกิจ: '+m.title+'</b><br>'+m.goal+'<br><br><i>เรียงขั้นตอนให้ถูกต้องตั้งแต่ต้นจนจบ</i>';
+  }else{
+    $('pL').textContent='📝 ภาษาบรรยาย (โจทย์)';
+    $('pR').textContent='💻 รหัสลำลอง (Pseudo Code)';
+    $('bTitle').textContent='📦 คลังบล็อกคำสั่ง (ลากไปวางในช่องว่างด้านบน หรือแตะเพื่อวาง)';
+    $('story').innerHTML='<b>ภารกิจ: '+m.title+'</b><br>'+m.th.map((t,i)=>(i+1)+'. '+t).join('<br>')+'<br><br><i>แปลงแต่ละบรรทัดเป็น Pseudo Code</i>';
+  }
+  header(); render();
+}
+function header(){
+  $('hStage').textContent='ด่าน '+stage+(stage===1?' (ภาษาไทย)':' (Pseudo Code)')+' • ภารกิจที่';
+  $('hMission').textContent=(idx+1)+'/'+MISSIONS.length;
+  $('hHearts').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+}
+
+/* ========= วาดบล็อกและช่อง ========= */
+function mkBlock(text,inSlot){
+  const b=document.createElement('div'); b.className='blk'+(stage===1?' th':'')+(inSlot?' inslot':''); b.textContent=text; b.draggable=true;
+  b.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',text)});
+  b.onclick=()=>{ if(busy)return;
+    if(inSlot){const i=placed.indexOf(text);placed[i]=null}
+    else{const i=placed.indexOf(null);if(i<0){toast('ช่องเต็มแล้ว');return}placed[i]=text}
+    render();
+  };
+  return b;
+}
+function render(){
+  const s=$('slots'), bank=$('bank'); s.innerHTML=''; bank.innerHTML='';
+  placed.forEach((t,i)=>{
+    const d=document.createElement('div'); d.className='slot'; d.dataset.i=i;
+    if(t){d.appendChild(mkBlock(t,true))} else d.textContent='วางบล็อกที่ '+(i+1);
+    d.addEventListener('dragover',e=>{e.preventDefault();d.classList.add('over')});
+    d.addEventListener('dragleave',()=>d.classList.remove('over'));
+    d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('over');if(busy)return;
+      const t2=e.dataTransfer.getData('text/plain'); const from=placed.indexOf(t2);
+      if(from>=0)placed[from]=null; placed[i]=t2; render()});
+    s.appendChild(d);
+  });
+  order.filter(t=>!placed.includes(t)).forEach(t=>bank.appendChild(mkBlock(t,false)));
+  const box=$('bankBox');
+  box.ondragover=e=>e.preventDefault();
+  box.ondrop=e=>{e.preventDefault();const t=e.dataTransfer.getData('text/plain');const f=placed.indexOf(t);if(f>=0){placed[f]=null;render()}};
+}
+
+/* ========= ตรวจคำตอบ ========= */
+$('btnRun').onclick=()=>{
+  if(busy)return;
+  const ans=answer();
+  if(placed.includes(null)){toast('วางบล็อกให้ครบทุกช่องก่อนนะ');return}
+  const okCount=placed.filter((t,i)=>t===ans[i]).length;
+  if(okCount===ans.length){
+    const pts=tries===0?PTS_FIRST:PTS_RETRY;
+    if(stage===1)s1+=pts; else s2+=pts;
+    passed++; busy=true;
+    document.querySelectorAll('.slot').forEach(s=>s.classList.add('ok'));
+    const last=idx===MISSIONS.length-1;
+    sync('กำลังเล่น');
+    modal('✅ ถูกต้อง! +'+pts+' คะแนน','คะแนนรวมตอนนี้ '+(s1+s2),()=>{busy=false;last?endStage():(idx++,loadMission())});
+  }else{
+    lives--; tries++; header();
+    document.querySelectorAll('.slot').forEach((s,i)=>s.classList.add(placed[i]===ans[i]?'ok':'bad'));
+    busy=true;
+    if(lives<=0){
+      modal('💔 ชีวิตหมดแล้ว','ถูก '+okCount+' จาก '+ans.length+' ตำแหน่ง',()=>{busy=false;endStage()});
+      return;
+    }
+    modal('❌ ยังไม่ถูกต้อง','ถูก <b>'+okCount+'</b> จาก '+ans.length+' ตำแหน่ง (ช่องสีเขียวถูกแล้ว)<br>เหลือชีวิต '+lives+' ดวง ลองใหม่นะ',()=>{busy=false;render()});
+  }
+};
+
+/* ========= จบด่าน / จบเกม ========= */
+function endStage(){
+  if(stage===1){
+    sync('กำลังเล่น');
+    modal('🎉 จบด่าน 1','คะแนนด่าน 1: <b>'+s1+'/50</b><br>ต่อไปด่าน 2: แปลงเป็น Pseudo Code<br>ชีวิตรีเซ็ตเป็น 3 ดวง',()=>{
+      stage=2; idx=0; lives=3; loadMission();
+    });
+  }else finish();
+}
+function finish(){
+  $('game').classList.add('hidden'); $('result').classList.remove('hidden');
+  const total=s1+s2;
+  $('rTitle').textContent=total>=80?'🏆 ยอดเยี่ยม!':(total>=50?'👍 ทำได้ดี':'💪 สู้ต่อไปนะ');
+  $('rScore').textContent=total;
+  $('rS1').textContent='ด่าน 1: '+s1+'/50';
+  $('rS2').textContent='ด่าน 2: '+s2+'/50';
+  $('rInfo').textContent='ตอบถูก '+passed+' จาก '+(MISSIONS.length*2)+' ภารกิจ';
+  $('rWho').textContent=player.name+' ('+player.id+')';
+  sync('จบเกม');
+}
+</script>
+</body>
+</html>
